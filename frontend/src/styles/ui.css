@@ -1,0 +1,451 @@
+/* Shared SOMPO primitives — avatars, modals, form fields, buttons, toasts.
+   Deliberately unscoped: every `sp-` name is unique, so these work on the
+   dashboard, the room screen and any dialog rendered outside them. */
+
+.sp-vis {
+  display: block;
+  width: 100%;
+  pointer-events: none;
+}
+.sp-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--sp-online);
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.75);
+}
+
+/* ── avatars ─────────────────────────────────────────────── */
+
+.sp-avatar {
+  position: relative;
+  display: inline-block;
+  flex: none;
+  border-radius: 50%;
+  overflow: visible;
+}
+
+.sp-avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.sp-avatar.has-ring img { box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.55); }
+
+.sp-avatar::after {
+  content: "";
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 2px solid #0b0714;
+  background: var(--sp-text-faint);
+}
+
+.sp-avatar.is-online::after { background: var(--sp-online); }
+.sp-avatar.is-busy::after { background: var(--sp-warn); }
+.sp-avatar.is-offline::after { background: #57506b; }
+.sp-avatar.no-dot::after { display: none; }
+
+/* ── modals ──────────────────────────────────────────────── */
+
+.sp-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(5, 3, 10, 0.74);
+  backdrop-filter: blur(6px);
+}
+
+.sp-modal {
+  position: relative;
+  width: min(440px, 100%);
+  max-height: 88vh;
+  padding: 26px;
+  border: 1px solid var(--sp-line);
+  border-radius: var(--sp-r-xl);
+  background: linear-gradient(165deg, #1a1030 0%, #100a1e 100%);
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.68);
+  overflow-y: auto;
+}
+
+.sp-modal--sm { width: min(360px, 100%); }
+
+.sp-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  color: var(--sp-text-faint);
+}
+
+.sp-modal-close:hover { background: rgba(255, 255, 255, 0.07); color: #fff; }
+
+.sp-modal-head { padding-bottom: 18px; }
+.sp-modal-head h2 { font-size: 21px; font-weight: 800; }
+.sp-modal-head p { padding-top: 5px; color: var(--sp-text-dim); font-size: 13px; }
+
+.sp-modal-art {
+  height: 120px;
+  margin-bottom: 16px;
+  border-radius: var(--sp-r);
+  overflow: hidden;
+}
+
+.sp-modal-art img { width: 100%; height: 100%; object-fit: cover; }
+
+.sp-modal-center { display: grid; gap: 10px; justify-items: center; text-align: center; }
+.sp-modal-center h2 { font-size: 19px; font-weight: 800; }
+.sp-modal-center p { color: var(--sp-text-dim); font-size: 13px; line-height: 1.5; }
+
+.sp-modal-icon {
+  display: grid;
+  place-items: center;
+  width: 62px;
+  height: 62px;
+  margin-bottom: 4px;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.16);
+  color: #f87171;
+}
+
+.sp-field { display: grid; gap: 7px; padding-bottom: 15px; }
+.sp-field label { color: var(--sp-text-dim); font-size: 12px; font-weight: 600; }
+
+.sp-field input,
+.sp-field textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--sp-line);
+  border-radius: var(--sp-r);
+  background: rgba(9, 6, 18, 0.8);
+  color: var(--sp-text);
+  font-family: inherit;
+  font-size: 13.5px;
+  outline: none;
+  resize: vertical;
+  transition: border-color 0.18s ease;
+}
+
+.sp-field textarea { min-height: 72px; }
+.sp-field input:focus,
+.sp-field textarea:focus { border-color: rgba(168, 85, 247, 0.6); }
+
+.sp-cover-picker { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+
+.sp-cover-picker button {
+  position: relative;
+  height: 46px;
+  border-radius: var(--sp-r-sm);
+  overflow: hidden;
+  opacity: 0.55;
+  transition: opacity 0.18s ease, box-shadow 0.18s ease;
+}
+
+.sp-cover-picker button img { width: 100%; height: 100%; object-fit: cover; }
+.sp-cover-picker button.is-active { opacity: 1; box-shadow: 0 0 0 2px var(--sp-purple); }
+.sp-cover-picker button:hover { opacity: 1; }
+
+.sp-cover-picker svg {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  color: #fff;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.8));
+}
+
+.sp-track-picker {
+  display: grid;
+  gap: 6px;
+  max-height: 168px;
+  overflow-y: auto;
+}
+
+.sp-track-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--sp-line);
+  border-radius: var(--sp-r-sm);
+  background: rgba(9, 6, 18, 0.6);
+}
+
+.sp-track-row.is-active { border-color: rgba(168, 85, 247, 0.6); background: rgba(124, 34, 206, 0.18); }
+.sp-track-pick { flex: 1; text-align: left; }
+.sp-track-pick strong { display: block; font-size: 12.5px; }
+.sp-track-pick small { color: var(--sp-text-faint); font-size: 10.5px; }
+
+.sp-track-preview {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(168, 85, 247, 0.18);
+  color: var(--sp-purple-bright);
+}
+
+.sp-privacy { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding-bottom: 16px; }
+
+.sp-privacy-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--sp-line);
+  border-radius: var(--sp-r);
+  background: rgba(9, 6, 18, 0.7);
+  color: var(--sp-text-dim);
+  text-align: left;
+  transition: border-color 0.18s ease, background 0.18s ease;
+}
+
+.sp-privacy-card strong { display: block; color: var(--sp-text); font-size: 12.5px; }
+.sp-privacy-card small { font-size: 10.5px; }
+.sp-privacy-card.is-active { border-color: rgba(168, 85, 247, 0.6); background: rgba(124, 34, 206, 0.2); }
+
+.sp-error {
+  padding: 0 0 12px;
+  color: #fca5a5;
+  font-size: 12.5px;
+}
+
+.sp-primary-btn {
+  width: 100%;
+  margin-top: 4px;
+  padding: 13px 0;
+  border-radius: var(--sp-r);
+  background: var(--sp-grad);
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: var(--sp-glow);
+}
+
+.sp-secondary-btn {
+  width: 100%;
+  margin-top: 9px;
+  padding: 12px 0;
+  border: 1px solid var(--sp-line);
+  border-radius: var(--sp-r);
+  color: var(--sp-text-dim);
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.sp-secondary-btn:hover { color: #fff; }
+
+.sp-danger-btn {
+  flex: 1;
+  padding: 12px 0;
+  border-radius: var(--sp-r);
+  background: linear-gradient(135deg, #dc2626, #ef4444);
+  font-size: 13.5px;
+  font-weight: 700;
+}
+
+.sp-danger-btn--inline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex: none;
+  justify-self: start;
+  padding: 11px 20px;
+}
+
+.sp-modal-actions { display: flex; gap: 10px; width: 100%; padding-top: 6px; }
+.sp-modal-actions .sp-secondary-btn { flex: 1; margin-top: 0; }
+
+/* ── toasts ──────────────────────────────────────────────── */
+
+.sp-toasts {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 120;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sp-toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  border: 1px solid var(--sp-line);
+  border-radius: var(--sp-r);
+  background: #180f2b;
+  color: var(--sp-text);
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.55);
+  animation: sp-toast-in 0.24s ease;
+}
+
+.sp-toast.is-ok svg { color: #4ade80; }
+.sp-toast.is-danger svg { color: #f87171; }
+.sp-toast button { color: var(--sp-text-faint); }
+.sp-toast button:hover { color: #fff; }
+
+@keyframes sp-toast-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+
+/* ── password gate ───────────────────────────────────────── */
+
+.sp-gate { display: grid; justify-items: center; text-align: center; }
+
+.sp-gate.is-shaking { animation: sp-gate-shake 0.42s ease; }
+
+@keyframes sp-gate-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-9px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-5px); }
+  80% { transform: translateX(4px); }
+}
+
+.sp-gate-art {
+  position: relative;
+  width: 100%;
+  height: 116px;
+  margin-bottom: 16px;
+  border-radius: var(--sp-r);
+  overflow: hidden;
+}
+
+.sp-gate-art img { width: 100%; height: 100%; object-fit: cover; }
+
+.sp-gate-art-fade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(9, 6, 18, 0.1), rgba(16, 10, 30, 0.92));
+}
+
+.sp-gate-lock {
+  position: absolute;
+  left: 50%;
+  bottom: 12px;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  border-radius: 50%;
+  background: rgba(124, 34, 206, 0.32);
+  color: #e9d5ff;
+  transform: translateX(-50%);
+}
+
+.sp-gate h2 { font-size: 21px; font-weight: 800; }
+
+.sp-gate-sub {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 0 16px;
+  color: var(--sp-text-dim);
+  font-size: 12.5px;
+}
+
+.sp-gate-field { width: 100%; text-align: left; }
+
+.sp-input-wrap { position: relative; display: flex; align-items: center; }
+.sp-input-wrap input { padding-right: 44px; }
+
+.sp-input-wrap button {
+  position: absolute;
+  right: 12px;
+  border: none;
+  background: none;
+  color: var(--sp-text-faint);
+  cursor: pointer;
+}
+
+.sp-input-wrap button:hover { color: #fff; }
+
+.sp-gate-icon {
+  display: grid;
+  place-items: center;
+  width: 66px;
+  height: 66px;
+  margin-bottom: 14px;
+  border-radius: 50%;
+}
+
+.sp-gate-icon.is-bad {
+  border: 1px solid rgba(239, 68, 68, 0.42);
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+}
+
+.sp-gate-icon.is-ok {
+  border: 1px solid rgba(34, 197, 94, 0.42);
+  background: rgba(34, 197, 94, 0.14);
+  color: #4ade80;
+}
+
+.sp-gate--error h2, .sp-gate--success h2 { font-size: 20px; }
+
+.sp-gate--error p, .sp-gate--success p {
+  padding: 8px 0 4px;
+  color: var(--sp-text-dim);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.sp-gate-attempts {
+  display: inline-block;
+  margin: 10px 0 18px;
+  padding: 5px 12px;
+  border-radius: 99px;
+  background: rgba(239, 68, 68, 0.12);
+  color: #fca5a5;
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+.sp-gate-bar {
+  width: 100%;
+  height: 5px;
+  margin: 16px 0 18px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.09);
+  overflow: hidden;
+}
+
+.sp-gate-bar span {
+  display: block;
+  height: 100%;
+  border-radius: 99px;
+  background: var(--sp-grad);
+  animation: sp-gate-fill 1.7s ease forwards;
+}
+
+@keyframes sp-gate-fill {
+  from { width: 6%; }
+  to { width: 100%; }
+}
+
+.sp-gate .sp-primary-btn,
+.sp-gate .sp-secondary-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+}

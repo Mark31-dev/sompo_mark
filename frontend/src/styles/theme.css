@@ -1,0 +1,33 @@
+:root {
+  --sp-bg-deep: #07050d;
+  --sp-bg: #0b0714;
+  --sp-panel: #120c20;
+  --sp-panel-2: #170f28;
+  --sp-panel-3: #1d1333;
+  --sp-line: rgba(168, 85, 247, 0.14);
+  --sp-line-soft: rgba(255, 255, 255, 0.06);
+
+  --sp-purple: #a855f7;
+  --sp-purple-deep: #7c22ce;
+  --sp-purple-bright: #c084fc;
+  --sp-purple-ink: rgba(168, 85, 247, 0.16);
+
+  --sp-text: #f4f0fb;
+  --sp-text-dim: #a094ba;
+  --sp-text-faint: #756a8c;
+
+  --sp-online: #22c55e;
+  --sp-warn: #fbbf24;
+
+  --sp-grad: linear-gradient(135deg, #9333ea 0%, #a855f7 55%, #c084fc 100%);
+  --sp-glow: 0 8px 26px rgba(147, 51, 234, 0.42);
+  --sp-glow-soft: 0 6px 20px rgba(147, 51, 234, 0.22);
+
+  --sp-r-sm: 10px;
+  --sp-r: 14px;
+  --sp-r-lg: 18px;
+  --sp-r-xl: 22px;
+
+  --sp-sidebar-w: 224px;
+  --sp-rail-w: 236px;
+}
