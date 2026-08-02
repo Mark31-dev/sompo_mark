@@ -2,6 +2,13 @@ import { db } from "./db.js";
 
 const TABLE = "users";
 
+function mysqlDate() {
+  return new Date()
+    .toISOString()
+    .slice(0, 19)
+    .replace("T", " ");
+}
+
 export function publicUser(row) {
   if (!row) return null;
   return {
@@ -22,7 +29,7 @@ export async function findById(id) {
 
 export async function upsert(username, activationId) {
   const existing = await findByName(username);
-  const now = new Date().toISOString();
+  const now = mysqlDate();
 
   if (existing) {
     await db().update(TABLE, { id: existing.id }, { last_seen_at: now });
@@ -39,7 +46,7 @@ export async function upsert(username, activationId) {
 }
 
 export async function touch(id) {
-  return db().update(TABLE, { id }, { last_seen_at: new Date().toISOString() });
+  return db().update(TABLE, { id }, { last_seen_at: mysqlDate() });
 }
 
 export async function list() {
