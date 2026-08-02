@@ -17,7 +17,22 @@ const PORT = Number(process.env.PORT || 4000);
 
 const app = express();
 
-app.use(cors({ origin: process.env.CORS_ORIGIN || true }));
+const allowedOrigins = [
+  "https://sompoteam.free.nf",
+  "http://localhost:5173",
+];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+  })
+);
 app.use(express.json({ limit: "256kb" }));
 
 app.get("/api/health", (req, res) => {
