@@ -70,10 +70,10 @@ const roomMembers = useMemo(() => {
   }));
 }, [realMembers]);
 
-  const chat = useRoomChat(room?.id ?? "none", roomMembers, {
-    live: online && !gated,
-    myId: profile.serverId ?? null,
-  });
+const chat = useRoomChat(room?.id ?? "none", roomMembers, {
+  live: online && !gated,
+  myId: profile.serverId ?? null,
+});
 
   const [tab, setTab] = useState("messages");
   const [range, setRange] = useState("today");
@@ -100,11 +100,17 @@ const roomMembers = useMemo(() => {
   }, [room, navigate]);
 
   useEffect(() => {
+  async function enterRoom() {
     if (!room || gated) return;
+
+    await api.joinRoom(room.id);
+
     joinRoom(room);
     recordVisit(room.id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [room?.id, gated]);
+  }
+
+  enterRoom();
+}, [room?.id, gated]);
 
   useEffect(() => {
   async function loadMembers() {
@@ -119,6 +125,8 @@ const roomMembers = useMemo(() => {
 
   loadMembers();
 }, [room]);
+
+
 
   useEffect(() => {
     const scroller = scrollerRef.current;
@@ -152,15 +160,21 @@ const roomMembers = useMemo(() => {
     ? chat.peers
     : roomMembers.filter((m) => m.status !== "offline");
 
+  const totalMembers = Math.max(
+  room.members || 0,
+  chat.peers.length,
+  );
+
   const cutoff = now - (range === "today" ? DAY : 365 * DAY);
   const visible = chat.messages.filter((m) => m.at >= cutoff);
 
   const list =
     tab === "pinned" ? chat.pinned : tab === "media" ? chat.media : visible;
 
-  const filteredMembers = roomMembers.filter((m) =>
+  const displayMembers = (chat.peers.length ? chat.peers : roomMembers).filter(
+  (m) =>
     m.name.toLowerCase().includes(memberQuery.trim().toLowerCase()),
-  );
+);
 
   function authorOf(message) {
     if (message.author === "system") {
@@ -299,7 +313,7 @@ const roomMembers = useMemo(() => {
                 <button
                   type="button"
                   className="is-danger"
-                  onClick={() => { leaveRoom(); navigate("/home"); }}
+                  onClick={() => { leaveRoom(room.id); navigate("/home"); }}
                 >
                   <LogOut size={14} />
                   Leave room
@@ -355,7 +369,7 @@ const roomMembers = useMemo(() => {
             </div>
             <div>
               <dt><Users size={13} /> Members</dt>
-              <dd>{room.members}</dd>
+              <dd>{totalMembers}</dd>
             </div>
             <div>
               <dt><Lock size={13} /> Type</dt>
@@ -618,7 +632,7 @@ const roomMembers = useMemo(() => {
 
         {/* ── right: members ──────────────────────────────── */}
         <aside className="sp-rp-members">
-          <h2>Members ({room.members})</h2>
+          <h2>Members ({displayMembers.length})</h2>
 
           <div className="sp-rp-search">
             <input
@@ -630,7 +644,7 @@ const roomMembers = useMemo(() => {
           </div>
 
           <div className="sp-rp-member-list">
-            {filteredMembers.map((member) => (
+            {displayMembers.map((member) => (
               <div key={member.id} className="sp-rp-member">
                 <Avatar
                   name={member.name}
@@ -656,7 +670,7 @@ const roomMembers = useMemo(() => {
               </div>
             ))}
 
-            {filteredMembers.length === 0 && (
+            {displayMembers.length === 0 && (
               <p className="sp-rp-empty">Nobody matches that name.</p>
             )}
           </div>
@@ -686,7 +700,7 @@ const roomMembers = useMemo(() => {
         <button
           type="button"
           className="sp-rp-leave"
-          onClick={() => { leaveRoom(); navigate("/home"); }}
+          onClick={() => { leaveRoom(room.id); navigate("/home"); }}
         >
           Leave Room
           <LogOut size={15} />

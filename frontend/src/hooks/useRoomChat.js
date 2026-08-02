@@ -56,6 +56,7 @@ export default function useRoomChat(roomId, roomMembers, { live = false, myId = 
 
   const timers = useRef([]);
   const typingTimer = useRef(null);
+  const previousRoomRef = useRef(roomId);
 
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
 
@@ -68,10 +69,14 @@ export default function useRoomChat(roomId, roomMembers, { live = false, myId = 
   /* ── local mode ─────────────────────────────────────────── */
 
   useEffect(() => {
-    if (live) return;
+  if (live) return;
+
+  if (previousRoomRef.current !== roomId) {
+    previousRoomRef.current = roomId;
     setMessages(hydrate(roomId));
     setTyping(null);
-  }, [roomId, live]);
+  }
+}, [roomId, live]);
 
   useEffect(() => {
     if (live) return;
@@ -121,19 +126,61 @@ export default function useRoomChat(roomId, roomMembers, { live = false, myId = 
           break;
 
         case "message:deleted":
-          setMessages((current) => current.filter((m) => m.id !== event.messageId));
-          break;
+  setMessages((current) => current.filter((m) => m.id !== event.messageId));
+  break;
 
-        case "typing":
-          setTyping(event.on ? event.user : null);
-          break;
+  case "presence":
+  setPeers(event.users || []);
+  break;
 
-        case "presence":
-          setPeers(event.users || []);
-          break;
 
-        default:
-          break;
+case "room:member-joined":
+
+  setMessages((current) => {
+    const text = `${event.user.name} joined the room 🎧`;
+
+    const exists = current.some(
+      (message) =>
+        message.kind === "system" &&
+        message.text === text
+    );
+
+    if (exists) return current;
+
+    return [
+      ...current,
+      {
+        id: `join-${Date.now()}`,
+        kind: "system",
+        author: "system",
+        text,
+        at: Date.now(),
+      },
+    ];
+  });
+
+  break;
+
+
+case "room:member-left":
+
+  setMessages((current) => [
+    ...current,
+    {
+      id: `leave-${Date.now()}`,
+      kind: "system",
+      author: "system",
+      text: `${event.user.name} left the room 👋`,
+      at: Date.now(),
+    },
+  ]);
+
+  break;
+
+
+case "typing":
+  setTyping(event.on ? event.user : null);
+  break;
       }
     });
 

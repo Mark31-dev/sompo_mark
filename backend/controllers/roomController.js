@@ -86,8 +86,16 @@ export async function join(req, res) {
   await Room.addMember(room.id, req.user.id);
   const [decorated] = await decorate([await Room.find(room.id)]);
 
-  broadcast({ type: "room:member-joined", roomId: Number(room.id), user: User.publicUser(req.user) },
-    Number(room.id));
+  const members = await Room.members(room.id);
+
+broadcast(
+  {
+    type: "room:presence-count",
+    roomId: Number(room.id),
+    count: members.length,
+  },
+  Number(room.id),
+);
 
   res.json({ ok: true, room: decorated });
 }
@@ -97,15 +105,29 @@ export async function leave(req, res) {
   if (!room) return res.status(404).json({ error: "Room not found." });
 
   await Room.removeMember(room.id, req.user.id);
+
   broadcast(
-  {
-    type: "room:member-left",
-    roomId: Number(room.id),
-    userId: req.user.id,
-    user: User.publicUser(req.user),
-  },
-  Number(room.id),
-);
+    {
+      type: "room:member-left",
+      roomId: Number(room.id),
+      userId: req.user.id,
+      user: User.publicUser(req.user),
+    },
+    Number(room.id),
+  );
+
+
+  const members = await Room.members(room.id);
+
+  broadcast(
+    {
+      type: "room:presence-count",
+      roomId: Number(room.id),
+      count: members.length,
+    },
+    Number(room.id),
+  );
+
 
   res.json({ ok: true });
 }

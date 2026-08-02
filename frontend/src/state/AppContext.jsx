@@ -9,6 +9,7 @@ import {
 } from "react";
 
 import api, { checkHealth, setToken } from "../services/api";
+import realtime from "../services/realtime";
 import {
   ACTIVATION_CODES,
   DEFAULT_PROFILE,
@@ -127,6 +128,53 @@ export function AppProvider({ children }) {
     return () => { cancelled = true; };
   }, []);
 
+  useEffect(() => {
+  if (!online) return;
+
+  realtime.connect();
+
+  const off = realtime.subscribe((event) => {
+    switch (event.type) {
+      case "room:created":
+        setRooms((current) => {
+          const exists = current.some(
+            (room) => Number(room.id) === Number(event.room.id)
+          );
+
+          if (exists) return current;
+
+          return [...current, event.room];
+        });
+        break;
+
+      case "room:updated":
+        setRooms((current) =>
+          current.map((room) =>
+            Number(room.id) === Number(event.room.id)
+              ? event.room
+              : room
+          ),
+        );
+        break;
+
+      case "room:deleted":
+        setRooms((current) =>
+          current.filter(
+            (room) => room.id !== event.roomId
+          ),
+        );
+        break;
+
+      default:
+        break;
+    }
+  });
+
+  return () => {
+    off();
+  };
+}, [online]);
+
   const pushToast = useCallback((text, kind = "ok") => {
     toastSeq.current += 1;
     const id = toastSeq.current;
@@ -216,14 +264,9 @@ if (!result.ok) {
 
       const newRoom = result.data.room;
 
-      setRooms((current) => [
-        ...current,
-        newRoom,
-      ]);
+pushToast(`"${newRoom.name}" created`);
 
-      pushToast(`"${newRoom.name}" created`);
-
-      return newRoom;
+return newRoom;
 
     } catch (error) {
       console.error("Create room error:", error);
@@ -303,10 +346,17 @@ if (!result.ok) {
     [recordVisit],
   );
 
-  const leaveRoom = useCallback(() => {
+  const leaveRoom = useCallback(
+  async (roomId) => {
+    if (online && roomId) {
+      await api.leaveRoom(roomId);
+    }
+
     setJoinedRoomId(null);
     pushToast("Left the room");
-  }, [pushToast]);
+  },
+  [pushToast, online],
+);
 
   const markNotificationsRead = useCallback(() => {
     setNotifications((current) => current.map((n) => ({ ...n, read: true })));
