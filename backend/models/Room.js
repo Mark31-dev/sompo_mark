@@ -4,6 +4,13 @@ import { hashPassword, verifyPassword } from "../lib/security.js";
 const TABLE = "rooms";
 const MEMBERS = "room_members";
 
+function mysqlDate() {
+  return new Date()
+    .toISOString()
+    .slice(0, 19)
+    .replace("T", " ");
+}
+
 export function publicRoom(row, ownerName) {
   if (!row) return null;
   return {
@@ -31,7 +38,7 @@ export async function find(id) {
 }
 
 export async function create(payload, ownerId) {
-  const now = new Date().toISOString();
+  const now = mysqlDate();
   const row = {
     id: Date.now(),
     name: payload.name,
