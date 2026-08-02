@@ -38,10 +38,13 @@ export async function create(req, res) {
   }
 
   const row = await Room.create({ ...req.body, name }, req.user.id);
-  const [room] = await decorate([row]);
 
-  broadcast({ type: "room:created", room });
-  res.status(201).json({ room });
+const freshRoom = await Room.find(row.id);
+
+const [room] = await decorate([freshRoom]);
+
+broadcast({ type: "room:created", room });
+res.status(201).json({ room });
 }
 
 export async function update(req, res) {
