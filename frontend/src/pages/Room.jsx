@@ -21,6 +21,8 @@ import { useApp } from "../state/AppContext";
 import { usePlayer } from "../state/PlayerContext";
 import { markUnlocked, needsPassword } from "../lib/unlocked";
 
+import api from "../services/api";
+
 import "../styles/theme.css";
 import "../styles/room.css";
 
@@ -41,7 +43,7 @@ function Room() {
   const navigate = useNavigate();
 
   const {
-    rooms, members, profile, isOwner, ownerName, favorites, toggleFavorite,
+    rooms, profile, isOwner, ownerName, favorites, toggleFavorite,
     mutedRooms, toggleMuteRoom, joinRoom, leaveRoom, pushToast, recordVisit,
     online, verifyRoomPassword,
   } = useApp();
@@ -54,13 +56,19 @@ function Room() {
   );
 
   const owner = room ? isOwner(room) : false;
-  const [gated, setGated] = useState(() => (room ? needsPassword(room, owner) : false));
 
-  const roomMembers = useMemo(() => {
-    if (!room) return [];
-    const list = members.slice(0, Math.max(6, Math.min(members.length, room.members)));
-    return list.map((m) => (m.isMe ? { ...m, roomId: room.id } : m));
-  }, [members, room]);
+const [gated, setGated] = useState(() =>
+  room ? needsPassword(room, owner) : false
+);
+
+const [realMembers, setRealMembers] = useState([]);
+
+const roomMembers = useMemo(() => {
+  return realMembers.map((member) => ({
+    ...member,
+    status: "online",
+  }));
+}, [realMembers]);
 
   const chat = useRoomChat(room?.id ?? "none", roomMembers, {
     live: online && !gated,
@@ -70,6 +78,7 @@ function Room() {
   const [tab, setTab] = useState("messages");
   const [range, setRange] = useState("today");
   const [draft, setDraft] = useState("");
+  const [now] = useState(() => Date.now());
   const [showEmoji, setShowEmoji] = useState(false);
   const [showShare, setShowShare] = useState(false);
   const [showMore, setShowMore] = useState(false);
@@ -78,6 +87,7 @@ function Room() {
   const [banner, setBanner] = useState(true);
   const [memberQuery, setMemberQuery] = useState("");
   const [pane, setPane] = useState("chat");
+  
 
   const scrollerRef = useRef(null);
   const inputRef = useRef(null);
@@ -95,6 +105,20 @@ function Room() {
     recordVisit(room.id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [room?.id, gated]);
+
+  useEffect(() => {
+  async function loadMembers() {
+    if (!room) return;
+
+    const result = await api.showRoom(room.id);
+
+    if (result.ok) {
+      setRealMembers(result.data.members || []);
+    }
+  }
+
+  loadMembers();
+}, [room]);
 
   useEffect(() => {
     const scroller = scrollerRef.current;
@@ -128,7 +152,7 @@ function Room() {
     ? chat.peers
     : roomMembers.filter((m) => m.status !== "offline");
 
-  const cutoff = Date.now() - (range === "today" ? DAY : 365 * DAY);
+  const cutoff = now - (range === "today" ? DAY : 365 * DAY);
   const visible = chat.messages.filter((m) => m.at >= cutoff);
 
   const list =
@@ -325,7 +349,7 @@ function Room() {
           <dl className="sp-rp-details">
             <div>
               <dt><Calendar size={13} /> Created</dt>
-              <dd>{new Date(room.createdAt || Date.now()).toLocaleDateString("en-US", {
+              <dd>{new Date(room.createdAt || now).toLocaleDateString("en-US", {
                 month: "short", day: "numeric", year: "numeric",
               })}</dd>
             </div>

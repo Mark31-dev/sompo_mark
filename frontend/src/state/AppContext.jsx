@@ -70,6 +70,8 @@ export function AppProvider({ children }) {
     ...read(KEYS.profile, {}),
   }));
 
+  
+
   const [rooms, setRooms] = useState(() => {
     const saved = read(KEYS.rooms, null);
     if (!Array.isArray(saved) || saved.length === 0) return DEFAULT_ROOMS;
@@ -189,28 +191,49 @@ export function AppProvider({ children }) {
   /* ── rooms ────────────────────────────────────────────── */
 
   const createRoom = useCallback(
-    ({ name, description, locked, password, coverKey, trackId }) => {
-      const room = {
-        id: Date.now(),
-        name: name.trim(),
-        genre: description.trim() || "Custom Room",
-        description: description.trim() || "Tap in and listen together.",
-        quote: description.trim() || "New room, fresh queue.",
-        members: 1,
-        locked,
-        password,
-        owner: ME,
-        coverKey: coverKey || "chill",
-        trackId: trackId || TRACKS[0].id,
-        createdAt: Date.now(),
-      };
-      setRooms((current) => [...current, room]);
-      if (online) api.createRoom({ ...room, coverKey: room.coverKey, trackId: room.trackId });
-      pushToast(`"${room.name}" created`);
-      return room;
-    },
-    [pushToast, online],
-  );
+  async ({ name, description, locked, password, coverKey, trackId }) => {
+
+    const payload = {
+      name: name.trim(),
+      genre: description.trim() || "Custom Room",
+      description: description.trim() || "Tap in and listen together.",
+      quote: description.trim() || "New room, fresh queue.",
+      locked,
+      password,
+      coverKey: coverKey || "chill",
+      trackId: trackId || TRACKS[0].id,
+    };
+
+    try {
+      const result = await api.createRoom(payload);
+
+console.log("CREATE ROOM RESULT:", result);
+
+if (!result.ok) {
+  pushToast(result.error || "Failed creating room", "danger");
+  return null;
+}
+
+      const newRoom = result.data.room;
+
+      setRooms((current) => [
+        ...current,
+        newRoom,
+      ]);
+
+      pushToast(`"${newRoom.name}" created`);
+
+      return newRoom;
+
+    } catch (error) {
+      console.error("Create room error:", error);
+      pushToast("Failed creating room", "danger");
+      return null;
+    }
+
+  },
+  [pushToast],
+);
 
   const updateRoom = useCallback(
     (updated, message = "Room updated") => {
@@ -369,8 +392,13 @@ export function AppProvider({ children }) {
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useApp() {
   const ctx = useContext(AppContext);
-  if (!ctx) throw new Error("useApp must be used inside AppProvider");
+
+  if (!ctx) {
+    throw new Error("useApp must be used inside AppProvider");
+  }
+
   return ctx;
 }

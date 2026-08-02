@@ -35,7 +35,7 @@ export async function checkHealth({ force = false } = {}) {
   probe = (async () => {
     try {
       const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 1500);
+      const timer = setTimeout(() => controller.abort(), 5000);
 
       const res = await fetch(`${BASE}/api/health`, { signal: controller.signal });
       clearTimeout(timer);
@@ -52,7 +52,9 @@ export async function checkHealth({ force = false } = {}) {
 }
 
 async function request(path, { method = "GET", body, auth = true } = {}) {
-  if (online === false) return { ok: false, offline: true, error: "Offline" };
+  if (online === false && !navigator.onLine) {
+  return { ok: false, offline: true, error: "Offline" };
+}
 
   try {
     const token = auth ? getToken() : null;
