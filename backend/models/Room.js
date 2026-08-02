@@ -42,7 +42,7 @@ export async function create(payload, ownerId) {
     track_id: payload.trackId || "t1",
     locked: payload.locked ? 1 : 0,
     password_hash: payload.locked ? hashPassword(payload.password) : null,
-    member_count: 1,
+    member_count: 0,
     owner_id: ownerId,
     created_at: now,
   };
