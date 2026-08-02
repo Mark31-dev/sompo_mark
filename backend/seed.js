@@ -50,13 +50,13 @@ export async function seedRooms() {
 
   for (const entry of ROOMS) {
     const owner = owners.get(entry.owner);
-    const row = await Room.create(entry, owner.id);
-
-    // Room.create() assigns a timestamp id; keep the demo ids stable instead.
-    if (Number(row.id) !== entry.id) {
-      await db().update("rooms", { id: row.id }, { id: entry.id });
-      await db().update("room_members", { room_id: row.id }, { room_id: entry.id });
-    }
+    const row = await Room.create(
+  {
+    ...entry,
+    id: entry.id,
+  },
+  owner.id,
+);
 
     for (const text of entry.seed) {
       await Message.create({ roomId: entry.id, userId: null, kind: "system", body: text });

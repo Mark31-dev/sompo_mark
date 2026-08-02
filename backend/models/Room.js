@@ -40,7 +40,7 @@ export async function find(id) {
 export async function create(payload, ownerId) {
   const now = mysqlDate();
   const row = {
-    id: Date.now(),
+    id: payload.id || Date.now(),
     name: payload.name,
     genre: payload.genre || "Custom Room",
     description: payload.description || "",
@@ -98,7 +98,10 @@ export async function addMember(roomId, userId, role = "member") {
     room_id: Number(roomId),
     user_id: userId,
     role,
-    joined_at: new Date().toISOString(),
+    joined_at: new Date()
+  .toISOString()
+  .slice(0, 19)
+  .replace("T", " "),
   });
 
   await db().increment(TABLE, { id: Number(roomId) }, "member_count", 1);

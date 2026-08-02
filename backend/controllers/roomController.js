@@ -97,8 +97,15 @@ export async function leave(req, res) {
   if (!room) return res.status(404).json({ error: "Room not found." });
 
   await Room.removeMember(room.id, req.user.id);
-  broadcast({ type: "room:member-left", roomId: Number(room.id), userId: req.user.id },
-    Number(room.id));
+  broadcast(
+  {
+    type: "room:member-left",
+    roomId: Number(room.id),
+    userId: req.user.id,
+    user: User.publicUser(req.user),
+  },
+  Number(room.id),
+);
 
   res.json({ ok: true });
 }
