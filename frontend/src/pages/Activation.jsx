@@ -1,8 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  ShieldCheck, ShieldX, User, Lock, Users, ChevronRight, HelpCircle,
-  X, Headphones,
+  ShieldCheck,
+  ShieldX,
+  User,
+  Lock,
+  Users,
+  ChevronRight,
+  X,
+  Headphones,
+  MessageCircle,
 } from "lucide-react";
 
 import BrandLogo, { BrandWordmark } from "../components/BrandLogo";
@@ -142,13 +149,20 @@ function Activation() {
             </div>
 
             <div className="sp-auth-help">
-              <HelpCircle size={16} />
-              Don&apos;t have an activation code?
-              <button type="button" onClick={() => setHelp(true)}>
-                Contact support
-                <ChevronRight size={14} />
-              </button>
-            </div>
+  <MessageCircle size={16} />
+
+  <span>
+    Don&apos;t have an activation code?
+  </span>
+
+  <a
+    href="https://www.facebook.com/markherrerodev"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    Contact support
+  </a>
+</div>
           </section>
         )}
 
@@ -208,7 +222,10 @@ function Activation() {
           </section>
         )}
 
-        <footer className="sp-auth-footer">Developed by Mark Herrero</footer>
+        <footer className="sp-auth-footer">
+  <span>DEVELOPED BY</span>
+  <b>MARK HERRERO</b>
+</footer>
       </div>
 
       {help && (
@@ -242,7 +259,16 @@ function Activation() {
               ))}
             </ul>
 
-            <p className="sp-auth-modal-note">support@sompoteam.app</p>
+            <p className="sp-auth-modal-note">
+  Contact:
+  <a
+    href="https://www.facebook.com/markherrerodev"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    facebook.com/markherrerodev
+  </a>
+</p>
           </div>
         </div>
       )}

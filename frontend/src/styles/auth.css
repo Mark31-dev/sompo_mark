@@ -277,27 +277,6 @@
 
 .sp-auth-help svg { color: #a855f7; }
 
-.sp-auth-help button {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  border: none;
-  background: none;
-  color: #a855f7;
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.sp-auth-help button:hover { color: #c084fc; }
-
-.sp-auth-footer {
-  padding-top: 22px;
-  color: #574f6d;
-  font-size: 11.5px;
-}
-
 .sp-auth-overlay {
   position: fixed;
   inset: 0;
@@ -379,4 +358,79 @@
   .sp-auth-card h2 { font-size: 22px; }
   .sp-auth-skyline { display: none; }
   .sp-auth-note { display: none; }
+}
+
+.sp-auth-footer {
+  margin-top:28px;
+  padding-bottom:20px;
+  display:flex;
+  justify-content:center;
+  gap:6px;
+  font-size:12px;
+  letter-spacing:2px;
+  color:#756a8c;
+  text-transform:uppercase;
+}
+
+.sp-auth-footer b {
+  color:#c084fc;
+  font-weight:800;
+}
+
+.sp-auth-help {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:18px;
+  color:#a9a0bd;
+  font-size:13px;
+}
+
+.sp-auth-help svg {
+  color:#c084fc;
+}
+
+.sp-auth-help a {
+  color:#c084fc;
+  font-weight:700;
+  text-decoration:none;
+  transition:.2s ease;
+}
+
+.sp-auth-help a:hover {
+  color:#e9d5ff;
+}
+
+
+.sp-auth-footer {
+  margin-top:55px;
+  padding-bottom:30px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  position:relative;
+  z-index:5;
+
+  color:#8b82a5;
+  font-size:11px;
+  font-weight:600;
+  letter-spacing:3px;
+  text-transform:uppercase;
+}
+
+.sp-auth-footer::before,
+.sp-auth-footer::after {
+  content:"";
+  width:65px;
+  height:1px;
+  background:rgba(192,132,252,0.5);
+}
+
+.sp-auth-footer b {
+  color:#c084fc;
+  font-weight:800;
+  letter-spacing:3.5px;
 }

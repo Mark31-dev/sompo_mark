@@ -24,11 +24,12 @@ function FeaturedHero({ onJoin }) {
     return () => clearInterval(timer);
   }, [paused, slides.length]);
 
-  useEffect(() => {
-    if (index >= slides.length) setIndex(0);
-  }, [index, slides.length]);
+  const safeIndex =
+  slides.length > 0 && index < slides.length
+    ? index
+    : 0;
 
-  const room = slides[index];
+  const room = slides[safeIndex];
   if (!room) return null;
 
   const isFavorite = favorites.includes(room.id);
@@ -98,7 +99,7 @@ function FeaturedHero({ onJoin }) {
               key={slide.id}
               type="button"
               aria-label={`Show ${slide.name}`}
-              className={i === index ? "is-active" : ""}
+              className={i === safeIndex ? "is-active" : ""}
               onClick={() => setIndex(i)}
             />
           ))}

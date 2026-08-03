@@ -21,7 +21,6 @@ import {
 
 import Avatar from "./Avatar";
 import Visualizer from "./Visualizer";
-import SidebarPlayer from "./SidebarPlayer";
 import useClickOutside from "../hooks/useClickOutside";
 import { useApp } from "../state/AppContext";
 import { useMusicLibrary } from "../state/MusicLibrary";
@@ -51,7 +50,7 @@ function Sidebar({ view, onView, onCreateRoom }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useClickOutside(() => setMenuOpen(false), menuOpen);
 
-  const { user, rooms, favorites, recents, history, joinedRoom, leaveRoom, isOwner } = useApp();
+  const { user, rooms, favorites, recents, history, joinedRoom, leaveRoom, isOwner, signOut } = useApp();
   const { likedSongs, recentSongs } = useMusicLibrary();
   const { playing } = usePlayer();
 
@@ -134,10 +133,17 @@ function Sidebar({ view, onView, onCreateRoom }) {
                 <History size={14} />
                 Recently played
               </button>
-              <button type="button" className="is-danger" onClick={() => navigate("/")}>
-                <LogOut size={14} />
-                Log out
-              </button>
+              <button
+  type="button"
+  className="is-danger"
+  onClick={() => {
+  signOut();
+  navigate("/", { replace: true });
+}}
+>
+  <LogOut size={14} />
+  Log out
+</button>
             </div>
           )}
 
@@ -160,8 +166,6 @@ function Sidebar({ view, onView, onCreateRoom }) {
             <ChevronDown size={16} />
           </button>
         </div>
-
-        <SidebarPlayer onOpen={() => onView("music")} />
       </div>
     </aside>
   );

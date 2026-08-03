@@ -216,3 +216,33 @@
   .sp-wordmark h1 { font-size: 34px; }
   .sp-splash-feats { gap: 14px; }
 }
+
+.sp-splash-status {
+  margin-top: 26px;
+  text-align: center;
+  letter-spacing: 3px;
+  color: #c084fc;
+  animation: sp-pulse 2s ease-in-out infinite;
+}
+
+.sp-splash-status strong {
+  display:block;
+  font-size:14px;
+}
+
+.sp-splash-status span {
+  display:block;
+  margin-top:8px;
+  color:#8f85a8;
+  font-size:12px;
+  letter-spacing:1px;
+}
+
+@keyframes sp-pulse {
+  0%,100% {
+    opacity:.6;
+  }
+  50% {
+    opacity:1;
+  }
+}

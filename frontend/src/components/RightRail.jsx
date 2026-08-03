@@ -20,15 +20,17 @@ function RightRail({ onView }) {
 
   return (
     <aside className="sp-rail">
-      <NowPlaying />
-      <OnlineMembers onViewAll={() => onView("members")} />
+  <NowPlaying />
+  <OnlineMembers onViewAll={() => onView("members")} />
 
-      <div className="sp-quote">
-        <p>&ldquo;{QUOTES[quoteIndex]}&rdquo;</p>
-        <Heart size={20} fill="currentColor" />
-        <Visualizer bars={18} height={22} gap={2} idle={!playing} className="sp-quote-vis" />
-      </div>
-    </aside>
+  <div style={{height: "500px"}} />
+
+  <div className="sp-quote">
+    <p>&ldquo;{QUOTES[quoteIndex]}&rdquo;</p>
+    <Heart size={20} fill="currentColor" />
+    <Visualizer bars={18} height={22} gap={2} idle={!playing} className="sp-quote-vis" />
+  </div>
+</aside>
   );
 }
 
