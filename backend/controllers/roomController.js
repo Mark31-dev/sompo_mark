@@ -1,6 +1,6 @@
 import * as Room from "../models/Room.js";
 import * as User from "../models/User.js";
-import { broadcast } from "../lib/realtime.js";
+import { broadcast, presence } from "../lib/realtime.js";
 
 async function decorate(rows) {
   const users = await User.list();
@@ -24,58 +24,95 @@ export async function show(req, res) {
   res.json({
     room: decorated,
     members: memberRows
-      .map((row) => ({ ...byId.get(Number(row.user_id)), role: row.role }))
+      .map((row) => ({
+        ...byId.get(Number(row.user_id)),
+        role: row.role,
+      }))
       .filter((member) => member.id),
   });
 }
 
 export async function create(req, res) {
   const name = String(req.body?.name || "").trim();
-  if (!name) return res.status(400).json({ error: "Room name is required." });
+
+  if (!name) {
+    return res.status(400).json({ error: "Room name is required." });
+  }
 
   if (req.body?.locked && String(req.body?.password || "").trim().length < 3) {
-    return res.status(400).json({ error: "Private rooms need a password of at least 3 characters." });
+    return res.status(400).json({
+      error: "Private rooms need a password of at least 3 characters.",
+    });
   }
 
   const row = await Room.create({ ...req.body, name }, req.user.id);
 
-const freshRoom = await Room.find(row.id);
+  const freshRoom = await Room.find(row.id);
 
-const [room] = await decorate([freshRoom]);
+  const [room] = await decorate([freshRoom]);
 
-broadcast({ type: "room:created", room });
-res.status(201).json({ room });
+  broadcast({
+    type: "room:created",
+    room,
+  });
+
+  res.status(201).json({ room });
 }
 
 export async function update(req, res) {
   const room = await Room.find(req.params.id);
-  if (!room) return res.status(404).json({ error: "Room not found." });
+
+  if (!room) {
+    return res.status(404).json({ error: "Room not found." });
+  }
+
   if (Number(room.owner_id) !== req.user.id) {
-    return res.status(403).json({ error: "Only the owner can edit this room." });
+    return res.status(403).json({
+      error: "Only the owner can edit this room.",
+    });
   }
 
   await Room.update(room.id, req.body || {});
+
   const [updated] = await decorate([await Room.find(room.id)]);
 
-  broadcast({ type: "room:updated", room: updated });
+  broadcast({
+    type: "room:updated",
+    room: updated,
+  });
+
   res.json({ room: updated });
 }
 
 export async function destroy(req, res) {
   const room = await Room.find(req.params.id);
-  if (!room) return res.status(404).json({ error: "Room not found." });
+
+  if (!room) {
+    return res.status(404).json({ error: "Room not found." });
+  }
+
   if (Number(room.owner_id) !== req.user.id) {
-    return res.status(403).json({ error: "Only the owner can delete this room." });
+    return res.status(403).json({
+      error: "Only the owner can delete this room.",
+    });
   }
 
   await Room.remove(room.id);
-  broadcast({ type: "room:deleted", roomId: Number(room.id) });
+
+  broadcast({
+    type: "room:deleted",
+    roomId: Number(room.id),
+  });
+
   res.json({ ok: true });
 }
 
 export async function join(req, res) {
   const room = await Room.find(req.params.id);
-  if (!room) return res.status(404).json({ error: "Room not found." });
+
+  if (!room) {
+    return res.status(404).json({ error: "Room not found." });
+  }
 
   const isOwner = Number(room.owner_id) === req.user.id;
 
@@ -84,50 +121,87 @@ export async function join(req, res) {
   }
 
   await Room.addMember(room.id, req.user.id);
+
+  const user = User.publicUser(req.user);
+
+  // joined message
+  broadcast(
+    {
+      type: "room:member-joined",
+      roomId: Number(room.id),
+      user,
+    },
+    Number(room.id),
+  );
+
+  // update member list
+  broadcast(
+    {
+      type: "presence",
+      roomId: Number(room.id),
+      users: presence(Number(room.id)),
+    },
+    Number(room.id),
+  );
+
+  // update card count
+  broadcast(
+    {
+      type: "room:presence-count",
+      roomId: Number(room.id),
+      count: presence(Number(room.id)).length,
+    },
+    Number(room.id),
+  );
+
   const [decorated] = await decorate([await Room.find(room.id)]);
 
-  const members = await Room.members(room.id);
-
-broadcast(
-  {
-    type: "room:presence-count",
-    roomId: Number(room.id),
-    count: members.length,
-  },
-  Number(room.id),
-);
-
-  res.json({ ok: true, room: decorated });
+  res.json({
+    ok: true,
+    room: decorated,
+  });
 }
 
 export async function leave(req, res) {
   const room = await Room.find(req.params.id);
-  if (!room) return res.status(404).json({ error: "Room not found." });
+
+  if (!room) {
+    return res.status(404).json({ error: "Room not found." });
+  }
 
   await Room.removeMember(room.id, req.user.id);
+
+  const user = User.publicUser(req.user);
 
   broadcast(
     {
       type: "room:member-left",
       roomId: Number(room.id),
       userId: req.user.id,
-      user: User.publicUser(req.user),
+      user,
     },
     Number(room.id),
   );
 
+  // update member list
+  broadcast(
+    {
+      type: "presence",
+      roomId: Number(room.id),
+      users: presence(Number(room.id)),
+    },
+    Number(room.id),
+  );
 
-  const members = await Room.members(room.id);
-
+  // update card count
   broadcast(
     {
       type: "room:presence-count",
       roomId: Number(room.id),
-      count: members.length,
+      count: presence(Number(room.id)).length,
     },
     Number(room.id),
   );
-
 
   res.json({ ok: true });
 }
