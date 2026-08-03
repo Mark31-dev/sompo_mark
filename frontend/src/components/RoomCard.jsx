@@ -14,7 +14,7 @@ function RoomCard({ room, onOpen, onEdit, onPassword, onDelete, onOpenPage }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useClickOutside(() => setMenuOpen(false), menuOpen);
 
-  const { isOwner: ownsRoom, favorites, toggleFavorite, pushToast } = useApp();
+  const { isOwner: ownsRoom, favorites, toggleFavorite, pushToast, roomPresence } = useApp();
   const { trackId, playing, toggle } = usePlayer();
 
   const isOwner = ownsRoom(room);
@@ -136,9 +136,9 @@ function RoomCard({ room, onOpen, onEdit, onPassword, onDelete, onOpenPage }) {
 
         <div className="sp-room-meta">
           <span>
-            <Users size={13} />
-            {room.members}
-          </span>
+  <Users size={13} />
+  {roomPresence?.[room.id] ?? room.members}
+</span>
           <span>
             {room.locked ? <Lock size={13} /> : <Globe size={13} />}
             {room.locked ? "Private" : "Public"}

@@ -96,6 +96,8 @@ export default function useRoomChat(roomId, roomMembers, { live = false, myId = 
       setMessages(result.data.messages.map((row) => fromServer(row, myId)));
     })();
 
+    console.log("WATCH ROOM:", roomId);
+
     realtime.connect();
     realtime.watch(roomId);
 
@@ -133,36 +135,34 @@ export default function useRoomChat(roomId, roomMembers, { live = false, myId = 
   setPeers(event.users || []);
   break;
 
+case "room:presence-count":
+  console.log("PRESENCE COUNT:", event.count);
+  break;
+
 
 case "room:member-joined":
 
-  setMessages((current) => {
-    const text = `${event.user.name} joined the room 🎧`;
-
-    const exists = current.some(
-      (message) =>
-        message.kind === "system" &&
-        message.text === text
-    );
-
-    if (exists) return current;
-
-    return [
-      ...current,
-      {
-        id: `join-${Date.now()}`,
-        kind: "system",
-        author: "system",
-        text,
-        at: Date.now(),
-      },
-    ];
-  });
+  setMessages((current) => [
+    ...current,
+    {
+      id: `join-${Date.now()}`,
+      kind: "system",
+      author: "system",
+      text: `${event.user.name} joined the room 🎧`,
+      at: Date.now(),
+    },
+  ]);
 
   break;
 
 
 case "room:member-left":
+
+  setPeers((current) =>
+    current.filter(
+      (user) => Number(user.id) !== Number(event.userId)
+    )
+  );
 
   setMessages((current) => [
     ...current,

@@ -127,7 +127,6 @@ const chat = useRoomChat(room?.id ?? "none", roomMembers, {
 }, [room]);
 
 
-
   useEffect(() => {
     const scroller = scrollerRef.current;
     if (scroller) scroller.scrollTop = scroller.scrollHeight;
@@ -171,7 +170,7 @@ const chat = useRoomChat(room?.id ?? "none", roomMembers, {
   const list =
     tab === "pinned" ? chat.pinned : tab === "media" ? chat.media : visible;
 
-  const displayMembers = (chat.peers.length ? chat.peers : roomMembers).filter(
+  const displayMembers = roomMembers.filter(
   (m) =>
     m.name.toLowerCase().includes(memberQuery.trim().toLowerCase()),
 );

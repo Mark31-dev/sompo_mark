@@ -74,10 +74,12 @@ export function AppProvider({ children }) {
   
 
   const [rooms, setRooms] = useState(() => {
-    const saved = read(KEYS.rooms, null);
-    if (!Array.isArray(saved) || saved.length === 0) return DEFAULT_ROOMS;
-    return saved.map(migrateRoom);
-  });
+  const saved = read(KEYS.rooms, null);
+  if (!Array.isArray(saved) || saved.length === 0) return DEFAULT_ROOMS;
+  return saved.map(migrateRoom);
+});
+
+const [roomPresence, setRoomPresence] = useState({});
 
   const [favorites, setFavorites] = useState(() => read(KEYS.favorites, [1]));
   const [recents, setRecents] = useState(() => read(KEYS.recents, seedRecents()));
@@ -134,41 +136,48 @@ export function AppProvider({ children }) {
   realtime.connect();
 
   const off = realtime.subscribe((event) => {
-    switch (event.type) {
-      case "room:created":
-        setRooms((current) => {
-          const exists = current.some(
-            (room) => Number(room.id) === Number(event.room.id)
-          );
-
-          if (exists) return current;
-
-          return [...current, event.room];
-        });
-        break;
-
-      case "room:updated":
-        setRooms((current) =>
-          current.map((room) =>
-            Number(room.id) === Number(event.room.id)
-              ? event.room
-              : room
-          ),
+  switch (event.type) {
+    case "room:created":
+      setRooms((current) => {
+        const exists = current.some(
+          (room) => Number(room.id) === Number(event.room.id)
         );
-        break;
 
-      case "room:deleted":
-        setRooms((current) =>
-          current.filter(
-            (room) => room.id !== event.roomId
-          ),
-        );
-        break;
+        if (exists) return current;
 
-      default:
-        break;
-    }
-  });
+        return [...current, event.room];
+      });
+      break;
+
+    case "room:updated":
+      setRooms((current) =>
+        current.map((room) =>
+          Number(room.id) === Number(event.room.id)
+            ? event.room
+            : room
+        ),
+      );
+      break;
+
+    case "room:deleted":
+      setRooms((current) =>
+        current.filter(
+          (room) => room.id !== event.roomId
+        ),
+      );
+      break;
+
+    case "room:presence-count":
+      setRoomPresence((current) => ({
+        ...current,
+        [event.roomId]: event.count,
+      }));
+      break;
+
+    default:
+      break;
+  }
+});
 
   return () => {
     off();
@@ -400,6 +409,7 @@ return newRoom;
       verifyRoomPassword,
 
       rooms,
+      roomPresence,
       members,
       onlineCount,
       favorites,
